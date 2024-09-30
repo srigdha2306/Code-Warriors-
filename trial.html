@@ -336,58 +336,74 @@
 
     <script>
         let glucoseReadings = [];
-        const ctx = document.getElementById('glucoseChart').getContext('2d');
-        const glucoseChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: [],
-                datasets: [{
-                    label: 'Glucose Level',
-                    data: [],
-                    borderColor: 'rgba(74, 144, 226, 1)',
-                    backgroundColor: 'rgba(74, 144, 226, 0.2)',
-                    borderWidth: 2,
-                    fill: true,
-                    tension: 0.4,
-                }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Glucose Level (mg/dL)',
-                        },
+    const ctx = document.getElementById('glucoseChart').getContext('2d');
+    const glucoseChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Glucose Level',
+                data: [],
+                borderColor: 'rgba(74, 144, 226, 1)',
+                backgroundColor: 'rgba(74, 144, 226, 0.2)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4,
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Glucose Level (mg/dL)',
                     },
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Time',
-                        },
-                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Time',
+                    },
                 }
             }
-        });
-
-        function addGlucoseReading() {
-            const glucoseInput = document.getElementById('glucoseLevel');
-            const glucoseValue = glucoseInput.value;
-
-            if (glucoseValue) {
-                const timeStamp = new Date().toLocaleString();
-                glucoseReadings.push({ time: timeStamp, level: glucoseValue });
-                
-                glucoseChart.data.labels.push(timeStamp);
-                glucoseChart.data.datasets[0].data.push(glucoseValue);
-                glucoseChart.update();
-                
-                addHistoryEntry(timeStamp, glucoseValue, null); // No insulin dose recorded yet
-                glucoseInput.value = '';
-            } else {
-                alert('Please enter a valid glucose level.');
-            }
         }
+    });
+
+    function addGlucoseReading() {
+        const glucoseInput = document.getElementById('glucoseLevel');
+        const glucoseValue = glucoseInput.value;
+
+        if (glucoseValue) {
+            const timeStamp = new Date().toLocaleString();
+            glucoseReadings.push({ time: timeStamp, level: glucoseValue });
+            
+            glucoseChart.data.labels.push(timeStamp);
+            glucoseChart.data.datasets[0].data.push(glucoseValue);
+            glucoseChart.update();
+
+            // AI-Powered Monitoring
+            monitorGlucoseLevel(glucoseValue, timeStamp);
+
+            glucoseInput.value = '';
+        } else {
+            alert('Please enter a valid glucose level.');
+        }
+    }
+
+    function monitorGlucoseLevel(level, timeStamp) {
+        const safeRange = { min: 70, max: 180 }; // Example threshold for safe glucose levels
+
+        if (level < safeRange.min) {
+            alert('Warning: Your glucose level is too low! Recorded at ' + timeStamp);
+            // Trigger AI action, e.g., send alert to healthcare provider
+        } else if (level > safeRange.max) {
+            alert('Warning: Your glucose level is too high! Recorded at ' + timeStamp);
+            // Trigger AI action, e.g., recommend insulin adjustment
+        } else {
+            console.log('Glucose level is normal at ' + timeStamp);
+        }
+    }
 
         function scheduleInjection() {
             const doseAmount = document.getElementById('doseAmount').value;
